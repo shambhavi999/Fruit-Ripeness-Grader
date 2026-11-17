@@ -1,0 +1,32 @@
+# Datasets and Archives
+dataset/
+*.zip
+*.tar.gz
+*.rar
+
+# Python bytecode & environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Distribution & Build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Task & scratch logs
+*.log
+scratch/

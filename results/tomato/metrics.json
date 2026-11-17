@@ -1,0 +1,32 @@
+{
+  "fruit": "tomato",
+  "backbone": "mobilenet_v2",
+  "accuracy": 0.9773,
+  "mae": 0.0227,
+  "qwk": 0.9823,
+  "per_class": {
+    "unripe": {
+      "precision": 0.9774,
+      "recall": 0.983,
+      "f1": 0.9802,
+      "support": 176
+    },
+    "ripe": {
+      "precision": 0.9769,
+      "recall": 0.9591,
+      "f1": 0.9679,
+      "support": 220
+    },
+    "overripe": {
+      "precision": 0.9778,
+      "recall": 0.991,
+      "f1": 0.9843,
+      "support": 222
+    }
+  },
+  "damage": {
+    "accuracy": 0.9682,
+    "precision": 0.8952,
+    "recall": 0.8868
+  }
+}
