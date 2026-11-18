@@ -127,6 +127,33 @@ st.markdown("""
         line-height: 0;
         margin-left: 1px;
     }
+    /* Sidebar Brand Header */
+    [data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+        padding-top: 1.5rem !important;
+    }
+    .sidebar-brand-header {
+        padding: 4px 0 16px 0;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #E5E9E5;
+    }
+    .fruitscan-sidebar-logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+    .fruitscan-sidebar-logo .fruitscan-brand-logo {
+        font-size: 26px !important;
+        letter-spacing: -0.9px !important;
+    }
+    .fruitscan-sidebar-tagline {
+        font-size: 11.5px;
+        font-weight: 600;
+        color: #6B7280;
+        line-height: 1.35;
+        letter-spacing: -0.2px;
+    }
+
     @media (max-width: 1200px) {
         .bento-brand-sub, .bento-brand-sep {
             display: none !important;
@@ -765,6 +792,15 @@ def compute_ordinal_probabilities(corn_logits: torch.Tensor, num_classes: int):
 # ── Sidebar Controls ─────────────────────────────────────────────────────────
 
 with st.sidebar:
+    st.markdown('''
+    <div class="sidebar-brand-header">
+        <div class="fruitscan-sidebar-logo">
+            <span class="fruitscan-brand-logo">Fruit<span class="fruitscan-brand-accent">Scan</span><span class="fruitscan-brand-dot">.</span></span>
+        </div>
+        <div class="fruitscan-sidebar-tagline">Fruit Ripeness Grading via Ordinal Regression</div>
+    </div>
+    ''', unsafe_allow_html=True)
+
     st.markdown("### Operating Mode")
     app_mode = st.radio(
         "Select Operating Mode",
