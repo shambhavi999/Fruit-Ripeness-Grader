@@ -56,7 +56,7 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800;900&display=swap');
 
     html, body, [class*="css"] {
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -96,11 +96,41 @@ st.markdown("""
     .bento-nav-brand {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
         font-weight: 800;
         font-size: 15px;
         color: #111827;
         letter-spacing: -0.3px;
+    }
+    .fruitscan-brand-logo {
+        font-family: 'Syne', 'Outfit', 'Plus Jakarta Sans', -apple-system, sans-serif;
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.8px;
+        color: #0F172A;
+        display: inline-flex;
+        align-items: center;
+        line-height: 1;
+        user-select: none;
+    }
+    .fruitscan-brand-accent {
+        background: linear-gradient(135deg, #16A34A 0%, #10B981 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 900;
+    }
+    .fruitscan-brand-dot {
+        color: #16A34A;
+        -webkit-text-fill-color: #16A34A;
+        font-size: 24px;
+        font-weight: 900;
+        line-height: 0;
+        margin-left: 1px;
+    }
+    @media (max-width: 1200px) {
+        .bento-brand-sub, .bento-brand-sep {
+            display: none !important;
+        }
     }
     .bento-nav-dot {
         width: 10px;
@@ -788,8 +818,9 @@ crop_name = FRUIT_SPECS[fruit]['name']
 st.markdown(f"""
 <div class="bento-nav">
     <div class="bento-nav-brand">
-        <span class="bento-nav-dot"></span>
-        <span>Fruit Ripeness Grading <span style="font-weight:600; color:#16A34A; font-size:13px;">via Ordinal Regression</span></span>
+        <span class="fruitscan-brand-logo">Fruit<span class="fruitscan-brand-accent">Scan</span><span class="fruitscan-brand-dot">.</span></span>
+        <span class="bento-brand-sep" style="color:#D1D5DB; margin: 0 4px; font-weight:300;">•</span>
+        <span class="bento-brand-sub" style="font-size:13px; font-weight:600; color:#4B5563;">Fruit Ripeness Grading <span style="font-weight:600; color:#16A34A;">via Ordinal Regression</span></span>
     </div>
     <div class="bento-nav-links">
         <span class="bento-nav-pill-active">{nav_mode_label}</span>
