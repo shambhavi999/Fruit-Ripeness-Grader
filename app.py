@@ -854,9 +854,8 @@ crop_name = FRUIT_SPECS[fruit]['name']
 st.markdown(f"""
 <div class="bento-nav">
     <div class="bento-nav-brand">
-        <span class="fruitscan-brand-logo">Fruit<span class="fruitscan-brand-accent">Scan</span><span class="fruitscan-brand-dot">.</span></span>
-        <span class="bento-brand-sep" style="color:#D1D5DB; margin: 0 4px; font-weight:300;">•</span>
-        <span class="bento-brand-sub" style="font-size:13px; font-weight:600; color:#4B5563;">Fruit Ripeness Grading <span style="font-weight:600; color:#16A34A;">via Ordinal Regression</span></span>
+        <span class="bento-nav-dot"></span>
+        <span>Fruit Ripeness Grading <span style="font-weight:600; color:#16A34A; font-size:13px;">via Ordinal Regression</span></span>
     </div>
     <div class="bento-nav-links">
         <span class="bento-nav-pill-active">{nav_mode_label}</span>
