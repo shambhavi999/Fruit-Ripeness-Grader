@@ -177,7 +177,7 @@ st.markdown("""
     /* Signature Bento Stats Grid (Nanoplazz Style: Mint, White, Sage, Bordered White) */
     .bento-top-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 14px;
         margin-bottom: 24px;
     }
@@ -258,7 +258,7 @@ st.markdown("""
     /* Bento Metric Tiles (Inspired by Nanoplazz clean bento style) */
     .bento-metric-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         gap: 14px;
         margin-bottom: 20px;
     }
@@ -331,13 +331,15 @@ st.markdown("""
 
     /* Buttons & Interactive Elements */
     .stButton > button {
-        border-radius: 9999px !important;
-        padding: 8px 24px !important;
+        border-radius: 14px !important;
+        padding: 10px 20px !important;
         font-weight: 700 !important;
         border: 1px solid #16A34A !important;
         background-color: #16A34A !important;
         color: #FFFFFF !important;
         transition: all 0.2s ease !important;
+        width: 100% !important;
+        line-height: 1.4 !important;
     }
     .stButton > button:hover {
         background-color: #15803D !important;
