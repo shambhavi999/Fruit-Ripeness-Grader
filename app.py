@@ -26,6 +26,7 @@ from datetime import datetime
 
 import streamlit as st
 import torch
+torch.set_num_threads(max(1, os.cpu_count() or 4))
 import numpy as np
 import cv2
 import pandas as pd
@@ -45,7 +46,7 @@ from src.gradcam import GradCAM, overlay_heatmap
 # ── Page Configuration ────────────────────────────────────────────────────────
 
 st.set_page_config(
-    page_title="Fruit Ripeness Grader & Packhouse QC System",
+    page_title="Fruit Ripeness Grading via Ordinal Regression",
     page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded",
@@ -68,8 +69,12 @@ st.markdown("""
     }
 
     /* Container bounds & padding */
+    /* Container bounds & padding (Fixed: generous top space so navbar is never cut off) */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+    }
     .block-container {
-        padding-top: 1.2rem !important;
+        padding-top: 5rem !important;
         padding-bottom: 2.5rem !important;
         padding-left: 2rem !important;
         padding-right: 2rem !important;
@@ -383,6 +388,33 @@ st.markdown("""
 
 
 # ── Domain Specifications & Tiers ─────────────────────────────────────────────
+
+
+BENCHMARK_20_SPECIMENS = {
+    "[Banana] 1. Unripe (Firm Green Peel)": ("sample_images/banana_unripe_sample.jpg", "banana", "Unripe"),
+    "[Banana] 2. Ripe (Optimal Yellow Table)": ("sample_images/banana_ripe_sample.jpg", "banana", "Ripe"),
+    "[Banana] 3. Ripe Cluster (Harvest Bundle)": ("sample_images/banana_ripe_bundle_sample.jpg", "banana", "Ripe"),
+    "[Banana] 4. Overripe (High Sugar Spotting)": ("sample_images/banana_overripe_sample.jpg", "banana", "Overripe"),
+    "[Banana] 5. Spoiled (Fermented Bio-Waste)": ("sample_images/banana_spoiled_sample.jpg", "banana", "Spoiled"),
+
+    "[Tomato] 1. Unripe (Mature Green)": ("sample_images/tomato_unripe_sample.jpg", "tomato", "Unripe"),
+    "[Tomato] 2. Ripe (Fresh Table Standard)": ("sample_images/tomato_ripe_sample.jpg", "tomato", "Ripe"),
+    "[Tomato] 3. Ripe (Vine Harvest Cluster)": ("sample_images/tomato_vine_ripe_sample.jpg", "tomato", "Ripe"),
+    "[Tomato] 4. Overripe (Soft Cannery Processing)": ("sample_images/tomato_overripe_sample.jpg", "tomato", "Overripe"),
+    "[Tomato] 5. Defect / Damaged (Surface Puncture)": ("sample_images/tomato_damaged_sample.jpg", "tomato", "Damaged"),
+
+    "[Strawberry] 1. Unripe (Green Calyx)": ("sample_images/strawberry_unripe_sample.jpg", "strawberry", "Unripe"),
+    "[Strawberry] 2. Partially Ripe (Breaking Pink)": ("sample_images/strawberry_partially_ripe_sample.jpg", "strawberry", "Partially Ripe"),
+    "[Strawberry] 3. Ripe (Fresh Table Punnet)": ("sample_images/strawberry_ripe_sample.jpg", "strawberry", "Ripe"),
+    "[Strawberry] 4. Sweet Ripe (Peak Sugar)": ("sample_images/strawberry_sweet_ripe_sample.jpg", "strawberry", "Ripe"),
+    "[Strawberry] 5. Rotten (Botrytis Mold Decay)": ("sample_images/strawberry_rotten_sample.jpg", "strawberry", "Rotten"),
+
+    "[Avocado] 1. Unripe (Hard Green Export)": ("sample_images/avocado_unripe_sample.jpg", "avocado", "Unripe"),
+    "[Avocado] 2. Partially Ripe (Breaking Skin)": ("sample_images/avocado_partially_ripe_sample.jpg", "avocado", "Partially Ripe"),
+    "[Avocado] 3. Ripe (Soft Yield Table)": ("sample_images/avocado_ripe_sample.jpg", "avocado", "Ripe"),
+    "[Avocado] 4. Hass Ripe (Dark Pebbled Skin)": ("sample_images/avocado_hass_ripe_sample.jpg", "avocado", "Ripe"),
+    "[Avocado] 5. Rotten (Rancid Oxidation)": ("sample_images/avocado_rotten_sample.jpg", "avocado", "Rotten"),
+}
 
 FRUIT_SPECS = {
     "banana": {
@@ -757,7 +789,7 @@ st.markdown(f"""
 <div class="bento-nav">
     <div class="bento-nav-brand">
         <span class="bento-nav-dot"></span>
-        <span>RipenIQ <span style="font-weight:500; color:#6B7280; font-size:13px;">Commercial Vision</span></span>
+        <span>Fruit Ripeness Grading <span style="font-weight:600; color:#16A34A; font-size:13px;">via Ordinal Regression</span></span>
     </div>
     <div class="bento-nav-links">
         <span class="bento-nav-pill-active">{nav_mode_label}</span>
@@ -776,17 +808,17 @@ st.markdown(f"""
 if app_mode == "Single Specimen Diagnostic":
     st.markdown("""
     <div class="bento-hero">
-        <div class="bento-hero-badge">Industrial Quality Control • Ordinal Vision</div>
-        <div class="bento-hero-title">Precision Ripeness — <span>revolution in post-harvest quality</span></div>
-        <div class="bento-hero-subtitle">Multi-spectral vision & ordinal neural ranking transforming commercial fruit sorting from subjective guesswork into calibrated packhouse intelligence.</div>
+        <div class="bento-hero-badge">Deep Learning • Ordinal Neural Regression</div>
+        <div class="bento-hero-title">Fruit Ripeness Grading <span>via Ordinal Regression</span></div>
+        <div class="bento-hero-subtitle">A Convolutional Neural Network (CNN) architecture learning visual features—color, texture, and shape—across natural biological ripeness orders (unripe → ripe → overripe).</div>
     </div>
     """, unsafe_allow_html=True)
 else:
     st.markdown("""
     <div class="bento-hero">
-        <div class="bento-hero-badge" style="background:#E0E7FF; color:#4338CA; border-color:#C7D2FE;">High-Throughput Conveyor Automation</div>
-        <div class="bento-hero-title">Bulk Crate & Pallet QC — <span>Conveyor Batch Sorting</span></div>
-        <div class="bento-hero-subtitle">Process multiple fruit cartons simultaneously, evaluate automated lot acceptance thresholds, and export traceable audit reports.</div>
+        <div class="bento-hero-badge" style="background:#E0E7FF; color:#4338CA; border-color:#C7D2FE;">Batch Evaluation & Quality Control</div>
+        <div class="bento-hero-title">Fruit Ripeness Grading — <span>Conveyor Batch QC</span></div>
+        <div class="bento-hero-subtitle">Automated high-throughput crate inspection evaluating lot acceptance thresholds and commercial distribution tiers.</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -835,40 +867,65 @@ if app_mode == "Single Specimen Diagnostic":
             <div class="bento-card-desc">Upload a produce photo or pick a pre-loaded benchmark test sample.</div>
         """, unsafe_allow_html=True)
 
-        # 1. Primary Direct File Uploader (Always visible!)
-        uploaded_file = st.file_uploader(
-            "Upload fruit photo (JPG, PNG, WEBP)",
-            type=["jpg", "jpeg", "png", "webp"],
-            key=f"uploader_{fruit}",
-            help="Drag and drop or browse an image file from your computer.",
-        )
-
-        # 2. Benchmark Sample Selector
-        sample_dir = Path("sample_images")
-        sample_images = {}
-        if sample_dir.exists():
-            for f in sorted(sample_dir.iterdir()):
-                if f.suffix.lower() in ('.jpg', '.jpeg', '.png') and fruit in f.stem.lower():
-                    clean_name = f.stem.replace(f"{fruit}_", "").replace("_sample", "").replace("_", " ").capitalize()
-                    sample_images[f"{clean_name} Sample"] = str(f)
-
-        sample_options = ["None (Upload Mode)"] + list(sample_images.keys())
-        selected_sample = st.selectbox(
-            "Or choose a benchmark test sample",
-            options=sample_options,
-            index=0 if uploaded_file else (1 if len(sample_options) > 1 else 0),
-            help="Quickly test pre-loaded benchmark specimens from the held-out test set.",
+        # Dual Input Selector: Upload Custom Image vs. 20 Pre-Loaded Benchmark Library
+        input_mode = st.radio(
+            "Produce Input Method",
+            options=["Select from 20 Pre-Loaded Benchmark Specimens", "Upload Your Own Produce Photo"],
+            index=0,
+            horizontal=True,
+            help="Pick one of the 20 pre-loaded benchmark specimens across all 4 fruits, or upload your own photo."
         )
 
         image = None
-        if uploaded_file is not None:
-            image = Image.open(uploaded_file).convert("RGB")
-            image = ImageOps.exif_transpose(image)
-            st.caption(f"Displaying uploaded image: `{uploaded_file.name}`")
-        elif selected_sample != "None (Upload Mode)" and selected_sample in sample_images:
-            image = Image.open(sample_images[selected_sample]).convert("RGB")
-            image = ImageOps.exif_transpose(image)
-            st.caption(f"Displaying benchmark test specimen: {selected_sample}")
+        active_fruit = fruit
+
+        if input_mode == "Upload Your Own Produce Photo":
+            # Feature 1: Original File Uploader (Untouched!)
+            uploaded_file = st.file_uploader(
+                "Upload fruit photo (JPG, PNG, WEBP)",
+                type=["jpg", "jpeg", "png", "webp"],
+                key=f"uploader_{fruit}",
+                help="Drag and drop or browse an image file from your computer.",
+            )
+            if uploaded_file is not None:
+                image = Image.open(uploaded_file).convert("RGB")
+                image = ImageOps.exif_transpose(image)
+                st.caption(f"Uploaded produce specimen: `{uploaded_file.name}`")
+        else:
+            # Feature 2: 20 Pre-Loaded Benchmark Specimens Library
+            col_filter1, col_filter2 = st.columns([1, 2])
+            with col_filter1:
+                category_filter = st.selectbox(
+                    "Crop Filter",
+                    options=["All Crops (20 Specimens)", "Banana (5)", "Tomato (5)", "Strawberry (5)", "Avocado (5)"],
+                    index=0,
+                )
+            
+            if "Banana" in category_filter:
+                bench_keys = [k for k in BENCHMARK_20_SPECIMENS if "[Banana]" in k]
+            elif "Tomato" in category_filter:
+                bench_keys = [k for k in BENCHMARK_20_SPECIMENS if "[Tomato]" in k]
+            elif "Strawberry" in category_filter:
+                bench_keys = [k for k in BENCHMARK_20_SPECIMENS if "[Strawberry]" in k]
+            elif "Avocado" in category_filter:
+                bench_keys = [k for k in BENCHMARK_20_SPECIMENS if "[Avocado]" in k]
+            else:
+                bench_keys = list(BENCHMARK_20_SPECIMENS.keys())
+
+            with col_filter2:
+                selected_sample = st.selectbox(
+                    "Choose from 20 Pre-Loaded Benchmark Images",
+                    options=bench_keys,
+                    index=0,
+                    help="Select any of the 20 calibrated benchmark produce images across all ripeness stages."
+                )
+
+            img_path, sample_fruit, ground_truth = BENCHMARK_20_SPECIMENS[selected_sample]
+            active_fruit = sample_fruit
+            if Path(img_path).exists():
+                image = Image.open(img_path).convert("RGB")
+                image = ImageOps.exif_transpose(image)
+                st.caption(f"Loaded Benchmark: **{selected_sample}** • Ground-Truth Stage: `{ground_truth}`")
 
         if image is not None:
             st.image(image, caption="Specimen for Analysis", use_container_width=True)
@@ -877,17 +934,24 @@ if app_mode == "Single Specimen Diagnostic":
 
     with col_results:
         if image is not None:
-            # Preprocessing & Inference
+            # Dynamically select calibrated model for active specimen
+            eval_fruit = active_fruit if 'active_fruit' in locals() else fruit
+            eval_model, eval_gradcam, _ = load_model(eval_fruit)
+            if eval_model is None:
+                eval_model, eval_gradcam = model, gradcam
+                eval_fruit = fruit
+
+            # Preprocessing & Fast Vectorized Inference
             transform = get_eval_transforms()
             input_tensor = transform(image).unsqueeze(0).to(device)
 
             t0 = time.perf_counter()
-            with torch.no_grad():
-                corn_logits, damage_logits = model(input_tensor)
+            with torch.inference_mode():
+                corn_logits, damage_logits = eval_model(input_tensor)
                 pred_label = corn_label_from_logits(corn_logits).item()
             latency_ms = (time.perf_counter() - t0) * 1000
 
-            spec = FRUIT_SPECS[fruit]
+            spec = FRUIT_SPECS[eval_fruit]
             classes = spec["classes"]
             num_classes = spec["num_classes"]
             max_rank = spec["max_rank"]
@@ -900,12 +964,12 @@ if app_mode == "Single Specimen Diagnostic":
             # Damage check for tomato
             is_damaged = False
             damage_prob = 0.0
-            if fruit == "tomato" and damage_logits is not None:
+            if eval_fruit == "tomato" and damage_logits is not None:
                 damage_prob = torch.sigmoid(damage_logits).item()
                 is_damaged = damage_prob > 0.5
 
             # Commercial Grade Standard Tier
-            tier_info = get_commercial_packhouse_tier(fruit, pred_name, expected_rank, is_damaged)
+            tier_info = get_commercial_packhouse_tier(eval_fruit, pred_name, expected_rank, is_damaged)
 
             # ── BENTO TILE 1: Key Performance Metrics Trio ───────────────────
             st.markdown(f"""
@@ -983,7 +1047,7 @@ if app_mode == "Single Specimen Diagnostic":
             """, unsafe_allow_html=True)
 
             # Tomato Damage Head Result
-            if fruit == "tomato" and damage_logits is not None:
+            if eval_fruit == "tomato" and damage_logits is not None:
                 if is_damaged:
                     st.markdown(f"""
                     <div class="bento-card" style="border-left: 6px solid #EF4444; background:#FEF2F2;">
@@ -1000,7 +1064,7 @@ if app_mode == "Single Specimen Diagnostic":
                     """, unsafe_allow_html=True)
 
             # ── BENTO TILE 4: Shelf-Life & Storage Guidance ───────────────────
-            shelf_spec = SHELF_LIFE_SPECS.get(fruit, {}).get(pred_name, {"days": "N/A", "action": "N/A"})
+            shelf_spec = SHELF_LIFE_SPECS.get(eval_fruit, {}).get(pred_name, {"days": "N/A", "action": "N/A"})
             st.markdown(f"""
             <div class="bento-card">
                 <div class="bento-card-title">Shelf-Life & Storage Protocol</div>
@@ -1025,7 +1089,7 @@ if app_mode == "Single Specimen Diagnostic":
             """, unsafe_allow_html=True)
 
             with torch.enable_grad():
-                cam = gradcam.generate(input_tensor, target_class=pred_label)
+                cam = eval_gradcam.generate(input_tensor, target_class=pred_label)
 
             original_np = np.array(image)
             overlay = overlay_heatmap(

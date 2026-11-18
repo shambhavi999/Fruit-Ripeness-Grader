@@ -63,9 +63,9 @@ def get_train_transforms(img_size: int = 224) -> transforms.Compose:
 
 
 def get_eval_transforms(img_size: int = 224) -> transforms.Compose:
-    """Deterministic transform for val/test images, preserving full fruit context."""
+    """Deterministic transform for val/test images with high-fidelity antialiasing."""
     return transforms.Compose([
-        transforms.Resize((img_size, img_size)),
+        transforms.Resize((img_size, img_size), interpolation=transforms.InterpolationMode.BILINEAR, antialias=True),
         transforms.ToTensor(),
         transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
     ])
